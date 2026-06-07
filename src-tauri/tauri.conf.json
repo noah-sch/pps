@@ -1,0 +1,49 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "Push Pull Skip",
+  "version": "0.1.0",
+  "identifier": "tech.bhive.pushpullskip",
+  "build": {
+    "frontendDist": "../front/dist",
+    "devUrl": "http://localhost:1420",
+    "beforeDevCommand": "npm --prefix front run dev",
+    "beforeBuildCommand": "npm --prefix front run build"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Push Pull Skip",
+        "width": 1200,
+        "height": 840,
+        "minWidth": 360,
+        "minHeight": 600,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ],
+    "security": {
+      "csp": null,
+      "assetProtocol": {
+        "enable": true,
+        "scope": ["$HOME/**"]
+      }
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "category": "HealthcareFitness",
+    "shortDescription": "Carnet d'entrainement Push / Pull / Skip",
+    "longDescription": "Push Pull Skip - un carnet d'entrainement structure autour de la routine Push / Pull / Legs. Enregistre tes seances, suis ton volume, tes records et ta regularite.",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "android": {
+      "debugApplicationIdSuffix": ".debug"
+    }
+  }
+}
