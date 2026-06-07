@@ -2,7 +2,7 @@
 name = "app"
 version = "0.1.0"
 description = "Push Pull Skip - carnet d'entrainement"
-authors = ["b-hive"]
+authors = ["pps"]
 license = ""
 repository = ""
 edition = "2021"

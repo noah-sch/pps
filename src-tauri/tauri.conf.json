@@ -2,7 +2,7 @@
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Push Pull Skip",
   "version": "0.1.0",
-  "identifier": "tech.bhive.pushpullskip",
+  "identifier": "com.pushpullskip.app",
   "build": {
     "frontendDist": "../front/dist",
     "devUrl": "http://localhost:1420",
