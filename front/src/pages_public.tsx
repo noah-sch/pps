@@ -13,6 +13,7 @@ import {
 import { Icons } from "./icons";
 import { useT, type Lang } from "./i18n";
 import { fmtDate, fmtVol } from "./derive";
+import { getRemember, setRemember as saveRemember } from "./prefs";
 import type { Derived, Nav, PublicUser, SeanceRef, Session } from "./types";
 import * as api from "./api";
 
@@ -358,6 +359,8 @@ export function AuthPage({
   // Prénom/email pré-remplis depuis la dernière connexion ; le mot de passe
   // démarre toujours vide (jamais mémorisé) et reste local à ce composant.
   const [form, setForm] = useState(() => ({ ...loadCreds(), password: "" }));
+  // « Se souvenir de moi » : reste connecté au prochain lancement (drapeau seul).
+  const [remember, setRemember] = useState(getRemember);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -368,15 +371,17 @@ export function AuthPage({
     setError(null);
     setBusy(true);
     try {
-      // Mémorise les identifiants pour pré-remplir la prochaine connexion.
+      // Mémorise prénom/email pour pré-remplir la prochaine connexion.
       if (mode === "signup") {
         const user = await api.signup(form.name, form.email, form.password);
         saveCreds(form);
         markAccountCreated();
+        saveRemember(true); // nouveau compte : on reste connecté par défaut
         onSignup(user);
       } else {
         const user = await api.login(form.email, form.password);
         saveCreds(form);
+        saveRemember(remember); // applique le choix « se souvenir de moi »
         onAuth(user);
       }
     } catch (err) {
@@ -454,6 +459,20 @@ export function AuthPage({
                 required
               />
             </Field>
+            {mode === "login" && (
+              <label className="-mt-1 flex cursor-pointer select-none items-center gap-2.5">
+                <input
+                  type="checkbox"
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
+                  style={{ accentColor: "var(--accent)" }}
+                  className="h-4 w-4 rounded border-line"
+                />
+                <span className="font-sans text-[13.5px] text-ink/70">
+                  {t("Se souvenir de moi")}
+                </span>
+              </label>
+            )}
             {error && (
               <p
                 className="font-sans text-[13px] font-medium"

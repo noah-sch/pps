@@ -10,6 +10,7 @@ import { ReferencesPage } from "./references";
 import { ProfilePage, type Theme } from "./profile";
 import { Onboarding } from "./onboarding";
 import { TrackingPage } from "./tracking";
+import { getRemember, setRemember } from "./prefs";
 import * as api from "./api";
 import type {
   ExerciseRef,
@@ -128,6 +129,11 @@ export default function App() {
         if (b.user?.language === "en" || b.user?.language === "fr") {
           setLang(b.user.language);
         }
+        // « Se souvenir de moi » : reconnexion automatique si un compte existe.
+        if (b.user && getRemember()) {
+          setUser(b.user);
+          setRoute({ name: "tracking", params: {} });
+        }
         setReady(true);
       })
       .catch((e) => {
@@ -189,6 +195,7 @@ export default function App() {
     nav("tracking");
   };
   const logout = () => {
+    setRemember(false); // déconnexion explicite : on ne reconnecte plus tout seul
     setUser(null);
     nav("landing");
   };

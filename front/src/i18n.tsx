@@ -158,6 +158,7 @@ const EN: Record<string, string> = {
   "Mot de passe": "Password",
   "Oublié ?": "Forgot it?",
   "8 caractères min.": "8 characters min.",
+  "Se souvenir de moi": "Remember me",
   "Créer mon compte": "Create my account",
   // ── FAQ ──
   Aide: "Help",
