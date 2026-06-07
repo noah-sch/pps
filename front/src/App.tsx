@@ -24,11 +24,11 @@ import type {
 
 // NAV labels are stored in French and translated at render time via t().
 const NAV: { key: RouteName; label: string; icon: keyof typeof Icons }[] = [
+  { key: "tracking", label: "Suivi", icon: "Trend" },
   { key: "history", label: "Historique", icon: "History" },
   { key: "add", label: "Ajouter", icon: "Plus" },
   { key: "references", label: "Références", icon: "Bookmark" },
   { key: "timer", label: "Chrono", icon: "Timer" },
-  { key: "tracking", label: "Suivi", icon: "Trend" },
 ];
 
 // ── Préférences appareil (langue + thème), mémorisées dans le localStorage ──
@@ -353,6 +353,7 @@ export default function App() {
     else if (route.name === "tracking")
       content = (
         <TrackingPage
+          user={user}
           derived={derived}
           sessions={sessions}
           seanceRefs={seanceRefs}

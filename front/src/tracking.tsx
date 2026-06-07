@@ -8,30 +8,41 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { BarChart, Card, Label, Segmented } from "./components";
 import { fmtDate, fmtVol } from "./derive";
 import { useT } from "./i18n";
-import type { Derived, ExerciseRef, SeanceRef, Session } from "./types";
+import type { Derived, ExerciseRef, PublicUser, SeanceRef, Session } from "./types";
 
 type Props = {
+  user: PublicUser;
   derived: Derived;
   sessions: Session[];
   seanceRefs: SeanceRef[];
   exerciseRefs: ExerciseRef[];
 };
 
+/** Salutation selon l'heure locale : matin / après-midi / soir. */
+function greetingKey(hour: number): string {
+  if (hour < 12) return "Bonjour, {name}";
+  if (hour < 18) return "Bon après-midi, {name}";
+  return "Bonsoir, {name}";
+}
+
 export function TrackingPage(props: Props) {
   const t = useT();
   const [tab, setTab] = useState("sessions");
+  const name = props.user.name?.trim() || "Alex";
+  const greeting = t(greetingKey(new Date().getHours()), { name });
   return (
     <div>
-      <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <Label className="mb-2">{t("Performances")}</Label>
-          <h1
-            className="font-serif text-[clamp(2rem,5vw,2.9rem)] font-medium leading-[1.02] tracking-[-0.02em] text-ink"
-            style={{ fontFamily: "var(--font-display)" }}
-          >
-            {t("Suivi")}
-          </h1>
-        </div>
+      {/* Salutation — tout en haut, en grand */}
+      <h1
+        className="font-serif text-[clamp(2.4rem,7vw,3.9rem)] font-medium leading-[1.05] tracking-[-0.02em] text-ink"
+        style={{ fontFamily: "var(--font-display)" }}
+      >
+        {greeting}
+      </h1>
+
+      {/* « Performances » + bascule Suivi / Analyse, alignés en dessous */}
+      <div className="mb-7 mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <Label>{t("Performances")}</Label>
         <Segmented
           options={[
             { value: "sessions", label: t("Suivi séances") },
@@ -87,7 +98,7 @@ function SessionTracking({ derived, sessions, seanceRefs, exerciseRefs }: Props)
   // découpe le calendrier (70 j) en colonnes de 7 jours
   const cols: typeof calendar[] = [];
   for (let i = 0; i < calendar.length; i += 7) cols.push(calendar.slice(i, i + 7));
-  const cell = 18;
+  const cell = 30;
 
   return (
     <div className="flex flex-col gap-9">
@@ -110,25 +121,32 @@ function SessionTracking({ derived, sessions, seanceRefs, exerciseRefs }: Props)
             ))}
           </div>
         </div>
-        <div className="flex gap-[5px] overflow-x-auto pb-2">
+        <div className="flex gap-[6px] overflow-x-auto pb-2">
           {cols.map((week, wi) => (
-            <div key={wi} className="flex flex-col gap-[5px]">
+            <div key={wi} className="flex flex-col gap-[6px]">
               {week.map((day, di) => {
                 const trained = !!(day.seance || day.type);
                 const sess = sessionByDay.get(new Date(day.date).toDateString());
                 const muscles = sess ? musclesOf(sess) : [];
+                // Pour les cases du haut, on affiche l'infobulle EN DESSOUS (sinon
+                // elle est rognée par l'overflow du conteneur scrollable) ; au-dessus
+                // pour les autres.
+                const below = di < 3;
                 return (
                   <div key={di} className="group relative">
                     <div
-                      className="rounded-[4px] border border-line/50 transition group-hover:ring-2 group-hover:ring-ink/30"
+                      className="rounded-[6px] border border-ink/10 transition group-hover:ring-2 group-hover:ring-ink/40"
                       style={{
                         width: cell,
                         height: cell,
-                        background: trained ? colorOf(day.seance) : "var(--cream)",
-                        opacity: trained ? 1 : 0.5,
+                        background: trained ? colorOf(day.seance) : "var(--line)",
                       }}
                     />
-                    <div className="pointer-events-none absolute bottom-full left-1/2 z-40 mb-2 hidden -translate-x-1/2 group-hover:block">
+                    <div
+                      className={`pointer-events-none absolute left-1/2 z-40 hidden -translate-x-1/2 group-hover:block ${
+                        below ? "top-full mt-2" : "bottom-full mb-2"
+                      }`}
+                    >
                       <div className="whitespace-nowrap rounded-xl border border-line bg-paper px-3.5 py-2.5 shadow-xl">
                         <div className="font-sans text-[12px] font-semibold text-ink">
                           {fmtDate(day.date, {
@@ -220,13 +238,119 @@ type APoint = {
   sets: { reps: number; weight: number }[];
 };
 
-function Analysis({ sessions }: Props) {
+// Barre de recherche d'exercice : filtre les propositions au fil de la frappe ;
+// Entrée (touche) ou clic sur une proposition sélectionne l'exercice.
+function ExerciseSearch({
+  value,
+  onChange,
+  options,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  options: string[];
+}) {
+  const t = useT();
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState(value);
+  const [prevValue, setPrevValue] = useState(value);
+  const boxRef = useRef<HTMLDivElement>(null);
+
+  // Resynchronise le champ quand la sélection change de l'extérieur (render-phase).
+  if (prevValue !== value) {
+    setPrevValue(value);
+    setQuery(value);
+  }
+
+  // « typed » : l'utilisateur a modifié le texte (sinon on montre toute la liste).
+  const typed = query !== value;
+  const q = query.trim().toLowerCase();
+  const matches =
+    typed && q ? options.filter((o) => o.toLowerCase().includes(q)) : options;
+
+  // Ferme + restaure le texte si on clique en dehors.
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: PointerEvent) => {
+      if (boxRef.current && !boxRef.current.contains(e.target as Node)) {
+        setOpen(false);
+        setQuery(value);
+      }
+    };
+    document.addEventListener("pointerdown", onDown);
+    return () => document.removeEventListener("pointerdown", onDown);
+  }, [open, value]);
+
+  const choose = (name: string) => {
+    onChange(name);
+    setQuery(name);
+    setOpen(false);
+  };
+
+  return (
+    <div className="relative" ref={boxRef}>
+      <input
+        value={query}
+        onChange={(e) => {
+          setQuery(e.target.value);
+          setOpen(true);
+        }}
+        onFocus={(e) => {
+          setOpen(true);
+          e.currentTarget.select();
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            if (typed && matches.length) {
+              const exact = options.find((o) => o.toLowerCase() === q);
+              choose(exact ?? matches[0]);
+            } else {
+              setOpen(false);
+            }
+          } else if (e.key === "Escape") {
+            setOpen(false);
+            setQuery(value);
+          }
+        }}
+        placeholder={t("Rechercher un exercice…")}
+        className="w-full rounded-xl border border-line bg-cream/40 px-4 py-2.5 font-sans text-[15px] text-ink placeholder:text-muted/70 outline-none transition focus:border-ink/50 focus:bg-paper"
+      />
+      {open && matches.length > 0 && (
+        <div className="absolute inset-x-0 top-full z-30 mt-1.5 max-h-64 overflow-y-auto rounded-xl border border-line bg-paper py-1 shadow-xl">
+          {matches.map((name) => (
+            <button
+              key={name}
+              type="button"
+              onClick={() => choose(name)}
+              className={`flex w-full items-center px-4 py-2.5 text-left font-sans text-[14px] transition hover:bg-cream/70 ${
+                name === value ? "font-medium text-accent" : "text-ink"
+              }`}
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Analysis({ sessions, exerciseRefs }: Props) {
   const t = useT();
   const today = new Date().toLocaleDateString("en-CA");
 
   const exercises = useMemo(
     () => [...new Set(sessions.flatMap((s) => s.exercises.map((e) => e.name)))].sort(),
     [sessions],
+  );
+  // Propositions de la barre de recherche : exercices en référence + ceux déjà
+  // enregistrés (dédoublonnés), triés alphabétiquement.
+  const searchOptions = useMemo(
+    () =>
+      [...new Set([...exerciseRefs.map((r) => r.name), ...exercises])].sort((a, b) =>
+        a.localeCompare(b),
+      ),
+    [exerciseRefs, exercises],
   );
   // exercice le plus fréquent par défaut
   const defaultEx = useMemo(() => {
@@ -312,17 +436,11 @@ function Analysis({ sessions }: Props) {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1.4fr_1fr]">
           <div>
             <Label className="mb-2">{t("Exercice")}</Label>
-            <select
+            <ExerciseSearch
               value={exercise}
-              onChange={(e) => setExercise(e.target.value)}
-              className="w-full rounded-xl border border-line bg-cream/40 px-4 py-2.5 font-sans text-[15px] text-ink outline-none transition focus:border-ink/50 focus:bg-paper"
-            >
-              {exercises.map((name) => (
-                <option key={name} value={name}>
-                  {name}
-                </option>
-              ))}
-            </select>
+              onChange={setExercise}
+              options={searchOptions}
+            />
           </div>
           <div>
             <Label className="mb-2">{t("Valeur affichée")}</Label>

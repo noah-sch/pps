@@ -17,32 +17,29 @@ import type { Derived, Nav, PublicUser, SeanceRef, Session } from "./types";
 import * as api from "./api";
 
 // ── « Rester connecté » ──────────────────────────────────────────────────────
-// Les identifiants de la dernière connexion réussie sont mémorisés localement
-// (localStorage, persisté par le webview Tauri entre deux lancements) afin de
-// pré-remplir le formulaire de connexion au retour dans l'app.
+// On mémorise localement uniquement le prénom et l'email de la dernière connexion
+// (localStorage, persisté par le webview Tauri) pour pré-remplir le formulaire.
+// Le mot de passe n'est JAMAIS stocké côté front : il reste haché (Argon2) en base
+// et l'utilisateur le ressaisit à chaque session.
 const CREDS_KEY = "pps.lastCredentials";
-type SavedCreds = { name: string; email: string; password: string };
+type SavedCreds = { name: string; email: string };
 
 function loadCreds(): SavedCreds {
   try {
     const raw = localStorage.getItem(CREDS_KEY);
     if (raw) {
       const v = JSON.parse(raw) as Partial<SavedCreds>;
-      return {
-        name: v.name ?? "",
-        email: v.email ?? "",
-        password: v.password ?? "",
-      };
+      return { name: v.name ?? "", email: v.email ?? "" };
     }
   } catch {
     // stockage indisponible ou corrompu — on repart d'un formulaire vide.
   }
-  return { name: "", email: "", password: "" };
+  return { name: "", email: "" };
 }
 
 function saveCreds(c: SavedCreds) {
   try {
-    localStorage.setItem(CREDS_KEY, JSON.stringify(c));
+    localStorage.setItem(CREDS_KEY, JSON.stringify({ name: c.name, email: c.email }));
   } catch {
     // stockage indisponible — la mémorisation est simplement ignorée.
   }
@@ -358,8 +355,9 @@ export function AuthPage({
   const [mode, setMode] = useState<"login" | "signup">(
     accountExists ? "login" : initialMode || "login",
   );
-  // Pré-rempli depuis la dernière connexion mémorisée (« rester connecté »).
-  const [form, setForm] = useState<SavedCreds>(loadCreds);
+  // Prénom/email pré-remplis depuis la dernière connexion ; le mot de passe
+  // démarre toujours vide (jamais mémorisé) et reste local à ce composant.
+  const [form, setForm] = useState(() => ({ ...loadCreds(), password: "" }));
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
