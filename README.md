@@ -1,7 +1,6 @@
 # PPS : Push Pull Skip
 
-**A simple, private workout journal** built around the **Push / Pull / Legs**
-("Skip") routine. Log your sessions, track your progress, beat your records —
+**A simple, private workout journal** built around your gym routine. Log your sessions, track your progress, beat your records —
 no online account, 100% on your device.
 
 A **cross-platform** app built with **Tauri 2**: one codebase for desktop
