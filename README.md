@@ -1,4 +1,4 @@
-# Push Pull Skip
+# PPS : Push Pull Skip
 
 **A simple, private workout journal** built around the **Push / Pull / Legs**
 ("Skip") routine. Log your sessions, track your progress, beat your records —
