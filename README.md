@@ -7,7 +7,7 @@ A **cross-platform** app built with **Tauri 2**: one codebase for desktop
 (macOS, Windows, Linux) and Android.
 
 >[!NOTE] 
-> Not on iOS bescause I'm broke. 
+> Not on iOS because I'm broke. 
 ---
 
 ## ✨ Features
