@@ -1,8 +1,9 @@
 name: Release
 
-# Tag a version to build & publish desktop installers, e.g.:
-#   npm version patch && git push --follow-tags   (run inside front/)
-# or push a tag manually: git tag v0.1.0 && git push origin v0.1.0
+# Tag a version to build & publish the desktop installers (macOS + Windows) and
+# an Android APK, all attached to the same GitHub Release. E.g.:
+#   git tag v0.1.0 && git push origin v0.1.0
+# The release is created as a draft — review it, then publish.
 on:
   push:
     tags:
@@ -63,3 +64,77 @@ jobs:
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
+
+  # ── Android APK ─────────────────────────────────────────────────────────────
+  # Runs after the desktop job (which creates the draft release), builds a
+  # DEBUG-signed universal APK — installable on any device without a keystore —
+  # and attaches it to the same release. Switch to a release keystore later by
+  # adding signing secrets + key.properties and dropping `--debug`.
+  android:
+    name: Android APK
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Java (JDK 17)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install NDK + platform + build-tools
+        run: |
+          sdkmanager "platforms;android-34" "build-tools;34.0.0" "ndk;27.2.12479018"
+          echo "NDK_HOME=$(ls -d "$ANDROID_HOME"/ndk/* | sort -V | tail -n1)" >> "$GITHUB_ENV"
+
+      - name: Setup Rust (Android targets)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+          key: android
+
+      - name: Install dependencies (root + front)
+        run: |
+          npm ci
+          npm --prefix front ci
+
+      - name: Build Android APK (debug-signed → installable)
+        run: |
+          npm run tauri -- android init --skip-targets-install
+          npm run tauri -- android build --apk --debug
+
+      - name: Collect & rename APK
+        id: apk
+        run: |
+          APK=$(find src-tauri/gen/android -path '*outputs/apk*' -name '*.apk' \
+                | grep -i universal | grep -i debug | head -n1)
+          [ -z "$APK" ] && APK=$(find src-tauri/gen/android -name '*.apk' | head -n1)
+          if [ -z "$APK" ]; then
+            echo "::error::No APK produced"; find src-tauri/gen/android -name '*.apk'; exit 1
+          fi
+          OUT="PPS_${{ github.ref_name }}_android.apk"
+          cp "$APK" "$OUT"
+          echo "path=$OUT" >> "$GITHUB_OUTPUT"
+          echo "Built $APK -> $OUT"
+
+      - name: Upload APK to the release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${{ github.ref_name }}" "${{ steps.apk.outputs.path }}" --clobber

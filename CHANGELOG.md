@@ -4,6 +4,17 @@ All notable changes to **Push Pull Skip** are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/) and the
 project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.1.2] — 2026-06-07
+
+### Added
+- **Android APK** is now built and published by CI on every `v*` tag (debug-signed
+  universal APK, installable directly), attached to the same GitHub Release as the
+  desktop installers.
+
+### Changed
+- The version shown on the landing page is now **dynamic**, read from the app
+  (`CARGO_PKG_VERSION` via the `app_version` command) instead of being hard-coded.
+
 ## [0.1.1] — 2026-06-07
 
 ### Fixed
@@ -37,5 +48,6 @@ project adheres to [Semantic Versioning](https://semver.org/).
 - Pages: Accueil, FAQ, Connexion/Inscription, Historique, Ajouter une séance,
   Références, Chronomètre, Suivi (cartes / éditorial / dense).
 
+[0.1.2]: https://github.com/noah-sch/pps/releases/tag/v0.1.2
 [0.1.1]: https://github.com/noah-sch/pps/releases/tag/v0.1.1
 [0.1.0]: https://github.com/noah-sch/pps/releases/tag/v0.1.0

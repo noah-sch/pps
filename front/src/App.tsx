@@ -313,6 +313,7 @@ export default function App() {
           seanceRefs={seanceRefs}
           lang={lang}
           setLang={setLang}
+          version={appVersion}
         />
       );
   } else {

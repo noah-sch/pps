@@ -190,6 +190,7 @@ export function LandingPage({
   seanceRefs,
   lang,
   setLang,
+  version,
 }: {
   nav: Nav;
   derived: Derived;
@@ -197,6 +198,7 @@ export function LandingPage({
   seanceRefs: SeanceRef[];
   lang: Lang;
   setLang: (l: Lang) => void;
+  version: string;
 }) {
   const t = useT();
   // Compte déjà créé / utilisé sur cet appareil : on masque la tuile d'inscription.
@@ -234,7 +236,7 @@ export function LandingPage({
         <div className="flex items-center justify-between whitespace-nowrap border-b border-line py-3 font-mono text-[10.5px] uppercase tracking-[0.2em] text-muted a-up">
           <span>{t("Système d'entraînement")}</span>
           <span className="hidden sm:block">{t("Enregistrement / Suivi / Analyse")}</span>
-          <span>№ 001 — v0.1.1</span>
+          <span>№ 001 — v{version}</span>
         </div>
 
         <div className="grid grid-cols-1 gap-12 py-8 lg:grid-cols-12 lg:gap-12 lg:py-12">
