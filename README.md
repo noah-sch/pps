@@ -1,91 +1,90 @@
 # Push Pull Skip
 
-**Carnet d'entraînement** simple et privé, structuré autour de la routine
-**Push / Pull / Legs** (« Skip »). Enregistre tes séances, suis ta progression,
-bats tes records — sans compte en ligne, 100 % sur ton appareil.
+**A simple, private workout journal** built around the **Push / Pull / Legs**
+("Skip") routine. Log your sessions, track your progress, beat your records —
+no online account, 100% on your device.
 
-Application **cross-platform** construite avec **Tauri 2** : un seul code pour le
-desktop (macOS, Windows, Linux) et Android.
+A **cross-platform** app built with **Tauri 2**: one codebase for desktop
+(macOS, Windows, Linux) and Android.
 
 ---
 
-## ✨ Fonctionnalités
+## ✨ Features
 
-- **Séances** — enregistre chaque séance avec ses exercices, séries, reps et charges.
-- **Références** — tes séances types (avec couleur) et exercices types (par groupe
-  musculaire) te sont proposés automatiquement à la saisie.
-- **Historique** — toutes tes séances regroupées par mois, dépliables, éditables.
-- **Suivi** — grille de régularité, volume cumulé et hebdomadaire, séries de records.
-- **Analyse** — courbe de progression par exercice (poids, charge/série, charge totale)
-  avec filtre de dates, et records de charge tous exercices.
-- **Chronomètre** — chrono de séance (avec tours) et minuteur de repos.
-- **Profil** — photo, âge, taille, poids, genre ; langue et thème.
+- **Sessions** — log each session with its exercises, sets, reps and loads.
+- **References** — your session templates (each with a colour) and exercise
+  templates (by muscle group) are suggested automatically as you type.
+- **History** — every session grouped by month, expandable and editable.
+- **Tracking** — consistency grid, cumulative and weekly volume, record streaks.
+- **Analysis** — progression chart per exercise (weight, load/set, total load)
+  with a date filter, plus strength records across all exercises.
+- **Timer** — session stopwatch (with laps) and rest timer.
+- **Profile** — photo, age, height, weight, gender; language and theme.
 
-## 💻 Plateformes
+## 💻 Platforms
 
 | Desktop | Mobile |
 | ------- | ------ |
 | macOS (Apple Silicon + Intel), Windows, Linux | Android |
 
-## 🌍 Langues
+## 🌍 Languages
 
-- **Français** (par défaut) et **English**.
-- Changement de langue dans l'app (page d'accueil ou profil) — le choix est mémorisé.
+- Available in **French** (default) and **English**.
+- Switch language inside the app (landing page or profile) — your choice is remembered.
 
 ## 📦 Installation
 
-### Pour les utilisateurs
+### For users
 
-Télécharge l'installeur depuis la page **[Releases](../../releases)** du dépôt :
+Download the installer from the repository's **[Releases](../../releases)** page:
 
-- **macOS** — `.dmg` (Apple Silicon ou Intel)
+- **macOS** — `.dmg` (Apple Silicon or Intel)
 - **Windows** — `.exe` / `.msi`
-- **Linux & Android** — à construire depuis les sources pour l'instant (voir ci-dessous)
+- **Linux & Android** — build from source for now (see below)
 
-> Les binaires ne sont pas signés : à la première ouverture, macOS (Gatekeeper) ou
-> Windows (SmartScreen) peut afficher un avertissement — autorise l'app manuellement.
+> The binaries are unsigned: on first launch, macOS (Gatekeeper) or Windows
+> (SmartScreen) may show a warning — allow the app manually.
 
-### Depuis les sources
+### From source
 
-Prérequis : **Node 20+**, **Rust** stable (`rustup`) et les
-[dépendances système Tauri](https://tauri.app/start/prerequisites/).
+Requirements: **Node 20+**, **Rust** stable (`rustup`), and the
+[Tauri system dependencies](https://tauri.app/start/prerequisites/).
 
 ```bash
-npm install                 # CLI Tauri (racine)
-npm install --prefix front  # dépendances du front
-npm run tauri dev           # lance l'app en développement
-npm run tauri build         # construit l'installeur pour ta plateforme
+npm install                 # Tauri CLI (root)
+npm install --prefix front  # front-end dependencies
+npm run tauri dev           # run the app in development
+npm run tauri build         # build the installer for your platform
 ```
 
-Android (après installation du SDK/NDK et `$JAVA_HOME`) :
+Android (after installing the SDK/NDK and setting `$JAVA_HOME`):
 
 ```bash
-npm run android:init        # une seule fois
-npm run android:dev         # émulateur / appareil branché
+npm run android:init        # once
+npm run android:dev         # emulator / connected device
 npm run android:build       # APK / AAB
 ```
 
-## 🔒 Données & confidentialité
+## 🔒 Data & privacy
 
-- Tout est stocké **localement** dans une base JSON, dans le dossier de données de
-  l'app — aucune donnée n'est envoyée sur un serveur.
-- L'app fonctionne **hors ligne**.
-- Les mots de passe ne sont **jamais** stockés en clair (hachage **Argon2**).
-- À la première ouverture, la base est **vide** : tu construis ton carnet au fil
-  de tes entraînements.
+- Everything is stored **locally** in a JSON database inside the app's data
+  folder — no data is ever sent to a server.
+- The app works **offline**.
+- Passwords are **never** stored in clear text (**Argon2** hashing).
+- On first launch the database is **empty**: you build your journal as you train.
 
 ## 🏷️ Versions
 
-Version actuelle : **0.1.0**. Le projet suit le [versionnage sémantique](https://semver.org/) ;
-l'historique des changements est dans [CHANGELOG.md](./CHANGELOG.md).
+Current version: **0.1.0**. The project follows [semantic versioning](https://semver.org/);
+the change history lives in [CHANGELOG.md](./CHANGELOG.md).
 
-Pousser un tag `v*` (ex. `v0.1.1`) déclenche la construction et la publication
-automatiques des installeurs macOS et Windows.
+Pushing a `v*` tag (e.g. `v0.1.1`) automatically builds and publishes the macOS
+and Windows installers.
 
-## 🛠️ Stack technique
+## 🛠️ Tech stack
 
-React + TypeScript + Tailwind CSS v4 (Vite) pour l'interface ; Rust pour le cœur
-natif (logique et accès aux données via des commandes Tauri appelées en IPC).
+React + TypeScript + Tailwind CSS v4 (Vite) for the UI; Rust for the native core
+(logic and data access via Tauri commands called over IPC).
 
 ---
 
