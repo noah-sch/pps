@@ -51,6 +51,10 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Ad-hoc sign the macOS bundle (proper sealed resources) so Gatekeeper
+          # reports "unverified" instead of "damaged". Empty on Windows (ignored
+          # there). NOT notarized — users still bypass once; see README.
+          APPLE_SIGNING_IDENTITY: ${{ matrix.platform == 'macos-latest' && '-' || '' }}
         with:
           projectPath: .
           tagName: ${{ github.ref_name }}

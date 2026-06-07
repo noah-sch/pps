@@ -4,6 +4,18 @@ All notable changes to **Push Pull Skip** are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/) and the
 project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.1.1] — 2026-06-07
+
+### Fixed
+- **macOS** bundles are now ad-hoc signed during the CI build, so Gatekeeper no
+  longer reports the app as *"damaged"* on Apple Silicon. First launch now shows
+  the regular unverified-developer prompt, bypassable via System Settings →
+  *Open Anyway* (the app is still not Developer-ID signed nor notarized).
+
+### Docs
+- Installation note explaining how to clear the macOS quarantine flag
+  (`xattr -dr com.apple.quarantine`) and the Windows SmartScreen prompt.
+
 ## [0.1.0] — 2026-06-06
 
 ### Added
@@ -25,4 +37,5 @@ project adheres to [Semantic Versioning](https://semver.org/).
 - Pages: Accueil, FAQ, Connexion/Inscription, Historique, Ajouter une séance,
   Références, Chronomètre, Suivi (cartes / éditorial / dense).
 
-[0.1.0]: https://example.com/releases/0.1.0
+[0.1.1]: https://github.com/noah-sch/pps/releases/tag/v0.1.1
+[0.1.0]: https://github.com/noah-sch/pps/releases/tag/v0.1.0

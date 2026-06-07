@@ -43,8 +43,18 @@ Download the installer from the repository's **[Releases](../../releases)** page
 - **Windows** — `.exe` / `.msi`
 - **Linux & Android** — build from source for now (see below)
 
-> The binaries are unsigned: on first launch, macOS (Gatekeeper) or Windows
-> (SmartScreen) may show a warning — allow the app manually.
+The binaries are **not signed with an Apple Developer ID nor notarized**, so the
+OS shows a warning on first launch. This is expected, not a real problem:
+
+- **macOS** — if you see *"PPS is damaged and can't be opened"* (or *"can't be
+  opened because Apple cannot check it"*), it's just Gatekeeper quarantine. Clear
+  it once from Terminal, then open the app normally:
+
+  ```bash
+  xattr -dr com.apple.quarantine /Applications/PPS.app
+  ```
+
+- **Windows** — SmartScreen may warn: click *More info → Run anyway*.
 
 ### From source
 

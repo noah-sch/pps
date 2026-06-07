@@ -1,7 +1,7 @@
 {
   "name": "push-pull-skip",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Push Pull Skip — carnet d'entrainement Tauri 2 (desktop + Android)",
   "scripts": {
     "tauri": "tauri",
