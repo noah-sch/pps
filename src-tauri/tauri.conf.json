@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "Push Pull Skip",
+  "productName": "PPS",
   "version": "0.1.0",
-  "identifier": "com.pushpullskip.app",
+  "identifier": "com.pps.app",
   "build": {
     "frontendDist": "../front/dist",
     "devUrl": "http://localhost:1420",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Push Pull Skip",
+        "title": "PPS",
         "width": 1200,
         "height": 840,
         "minWidth": 360,
@@ -33,8 +33,8 @@
     "active": true,
     "targets": "all",
     "category": "HealthcareFitness",
-    "shortDescription": "Carnet d'entrainement Push / Pull / Skip",
-    "longDescription": "Push Pull Skip - un carnet d'entrainement structure autour de la routine Push / Pull / Legs. Enregistre tes seances, suis ton volume, tes records et ta regularite.",
+    "shortDescription": "Carnet d'entrainement",
+    "longDescription": "PPS - un carnet d'entrainement structure autour de ta routine muscu. Enregistre tes seances, suis ton volume, tes records et ta regularité.",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
