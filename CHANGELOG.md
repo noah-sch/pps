@@ -4,6 +4,28 @@ All notable changes to **Push Pull Skip** are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/) and the
 project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.2.0] — 2026-06-07
+
+### Added
+- **Séances types** : chaque séance type porte maintenant une liste d'exercices
+  (choisis parmi les exercices en référence, via une recherche en
+  autocomplétion). Choisir une séance type dans « Ajouter » pré-remplit ses
+  exercices — il ne reste qu'à saisir les séries. Modifier un modèle plus tard
+  n'affecte pas l'historique mais s'applique aux prochains ajouts.
+- **Releases Android signées & updatables** : la CI signe l'APK avec une
+  keystore stable (secrets GitHub), donc les nouvelles versions s'installent
+  comme de vraies **mises à jour** qui conservent la base de données locale.
+  Repli sur un APK debug si aucune keystore n'est configurée.
+
+### Changed / Fixed
+- **Affichage mobile** : gestion des *safe-area* — la barre de statut ne
+  recouvre plus l'en-tête, et la barre de navigation remonte au-dessus des
+  boutons/gestes système (`viewport-fit=cover` + `env(safe-area-inset-*)`).
+- **Régularité (mobile)** : la grille défile automatiquement à droite pour
+  montrer les séances récentes ; un appui sur une case affiche le détail
+  (équivalent du survol desktop), repositionné pour rester visible près des bords.
+- **Icône** de l'application régénérée depuis la source PPS (desktop + Android).
+
 ## [0.1.2] — 2026-06-07
 
 ### Added
@@ -48,6 +70,7 @@ project adheres to [Semantic Versioning](https://semver.org/).
 - Pages: Accueil, FAQ, Connexion/Inscription, Historique, Ajouter une séance,
   Références, Chronomètre, Suivi (cartes / éditorial / dense).
 
+[0.2.0]: https://github.com/noah-sch/pps/releases/tag/v0.2.0
 [0.1.2]: https://github.com/noah-sch/pps/releases/tag/v0.1.2
 [0.1.1]: https://github.com/noah-sch/pps/releases/tag/v0.1.1
 [0.1.0]: https://github.com/noah-sch/pps/releases/tag/v0.1.0
