@@ -1,0 +1,146 @@
+@import "tailwindcss";
+
+/* ── Design tokens ───────────────────────────────────────────────────────────
+   Mirrors the reference Tailwind config. Colour/font/radius tokens map onto the
+   runtime CSS variables below so the look stays driven by a single source. */
+@theme {
+  --color-cream: #f4f1ea;
+  --color-paper: #fbfaf7;
+  --color-ink: #1c1a16;
+  --color-muted: #8e877b;
+  --color-line: #e5e0d5;
+  --color-sage: #9aa17e;
+  --color-accent: var(--accent);
+
+  --font-serif: var(--font-display), Georgia, serif;
+  --font-sans: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --radius-card: var(--radius-card-px);
+}
+
+/* ── Runtime variables — design tweaks baked in ──────────────────────────────
+   • Couleur secondaire : orange      → --accent
+   • Titres : style moderne           → --font-display = Space Grotesk
+   • Coins : doux (arrondis)          → --radius-card-px = 18px              */
+:root {
+  --accent: oklch(0.7 0.17 50);
+  --accent-soft: oklch(0.7 0.17 50 / 0.15);
+  --font-display: "Space Grotesk", Georgia, serif;
+  --radius-card-px: 18px;
+  color-scheme: light;
+}
+
+/* ── Thème sombre ────────────────────────────────────────────────────────────
+   Activé par la classe `.dark` posée sur <html> (gérée côté React et mémorisée).
+   On ne fait que réassigner les tokens de couleur : tout le reste de l'UI les
+   consomme via `var(--color-*)`, donc bascule automatiquement. Palette sombre
+   chaude, cohérente avec l'esprit « papier » du thème clair. L'accent (orange)
+   et le titre « Push Pull Skip » restent inchangés. */
+.dark {
+  --color-cream: #15130f; /* fond */
+  --color-paper: #1f1c16; /* surfaces / cartes */
+  --color-ink: #f1ece2; /* texte */
+  --color-muted: #9a9080; /* texte secondaire */
+  --color-line: #332f27; /* filets / bordures */
+  --color-sage: #9aa17e;
+  --accent-soft: oklch(0.7 0.17 50 / 0.22);
+  color-scheme: dark;
+}
+
+body {
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #3a352b;
+  border-color: var(--color-cream);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Curseur « main » sur tout ce qui est cliquable. Tailwind v4 ne le met plus
+   par défaut sur les <button>. Les boutons désactivés sont exclus (ils gardent
+   le curseur par défaut), et une classe utilitaire cursor-* sur un élément
+   précis l'emporte toujours (couche utilities > base). */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  a[href],
+  label[for],
+  summary,
+  select {
+    cursor: pointer;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* `font-serif` already resolves to --font-display via the theme token. */
+::selection {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Landing — kinetic concept animations */
+@keyframes pps-in-l {
+  from { opacity: 0; transform: translateX(-0.5em); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes pps-in-r {
+  from { opacity: 0; transform: translateX(0.5em); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes pps-skip {
+  0% { opacity: 0; transform: translateY(0.6em); }
+  55% { opacity: 1; transform: translateY(-0.1em); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes pps-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pps-rule {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .a-l { animation: pps-in-l 0.8s cubic-bezier(0.2, 0.75, 0.2, 1) both; }
+  .a-r { animation: pps-in-r 0.8s cubic-bezier(0.2, 0.75, 0.2, 1) both; }
+  .a-skip { animation: pps-skip 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+  .a-up { animation: pps-up 0.7s ease both; }
+  .a-rule {
+    animation: pps-rule 0.7s cubic-bezier(0.5, 0, 0.1, 1) both;
+    transform-origin: left;
+  }
+}
+
+/* tidy number inputs */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* subtle scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #d9d3c6;
+  border-radius: 6px;
+  border: 3px solid var(--color-cream);
+}

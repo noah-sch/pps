@@ -1,0 +1,57 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Push Pull Skip — .gitignore
+# On versionne le CODE SOURCE uniquement. Tout ce qui est généré, compilé,
+# installé ou personnel reste hors du dépôt (notamment les apps téléchargeables,
+# qui vivent dans src-tauri/target/release/bundle).
+# Les fichiers de lock (package-lock.json, Cargo.lock) restent versionnés.
+# ──────────────────────────────────────────────────────────────────────────────
+
+# Dépendances
+node_modules/
+
+# Build du front (Vite)
+dist/
+dist-ssr/
+front/dist/
+
+# Build & artefacts Rust / Tauri (inclut les installeurs/apps téléchargeables)
+src-tauri/target/
+
+# Projets & schémas générés par Tauri (regénérés : tauri android init / build)
+src-tauri/gen/
+
+# Signing / secrets — ne JAMAIS publier
+*.key
+*.pem
+*.p12
+*.keystore
+*.jks
+key.properties
+
+# Variables d'environnement (on garde un éventuel .env.example)
+.env
+.env.*
+!.env.example
+*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Config locale (éditeur / outils) — non publiée
+.vscode/
+.idea/
+.claude/
+example/
+
+# Détritus OS & éditeurs
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

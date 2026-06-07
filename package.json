@@ -1,0 +1,19 @@
+{
+  "name": "push-pull-skip",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Push Pull Skip — carnet d'entrainement Tauri 2 (desktop + Android)",
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "front": "npm --prefix front run dev",
+    "front:build": "npm --prefix front run build",
+    "android:init": "tauri android init",
+    "android:dev": "tauri android dev",
+    "android:build": "tauri android build"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.11.2"
+  }
+}
