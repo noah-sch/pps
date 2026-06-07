@@ -29,6 +29,9 @@ export interface SeanceRef {
   id: string;
   name: string;
   color: string;
+  /** Ordered exercise names (each must exist in the exercise refs) used to
+   *  pre-fill a new session created from this template. */
+  exercises: string[];
 }
 
 /** Reference "exercice type": name + muscle group (optional) + note (optional). */

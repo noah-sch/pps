@@ -50,12 +50,16 @@ pub struct Session {
     pub duration: f64,
 }
 
-/// Reference "séance type": a reusable name + colour used in the régularité grid.
+/// Reference "séance type": a reusable name + colour used in the régularité grid,
+/// plus an ordered list of exercise names (each must exist in the exercise
+/// references) used to pre-fill a new session created from this template.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SeanceRef {
     pub id: String,
     pub name: String,
     pub color: String,
+    #[serde(default)]
+    pub exercises: Vec<String>,
 }
 
 /// Reference "exercice type": a name + targeted muscle group + optional note.

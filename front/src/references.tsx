@@ -55,6 +55,7 @@ export function SeanceCombo({
   onChange,
   seanceRefs,
   onAddRef,
+  onPickRef,
   placeholder,
   autoFocus,
 }: {
@@ -62,6 +63,8 @@ export function SeanceCombo({
   onChange: (v: string) => void;
   seanceRefs: SeanceRef[];
   onAddRef: (name: string) => SeanceRef;
+  /** Fired when an existing template is selected — lets the caller pre-fill. */
+  onPickRef?: (ref: SeanceRef) => void;
   placeholder?: string;
   autoFocus?: boolean;
 }) {
@@ -74,8 +77,9 @@ export function SeanceCombo({
   const showAdd = (value || "").trim() && !exact;
   useCloseOnOutside(boxRef, open, () => setOpen(false));
 
-  const choose = (name: string) => {
-    onChange(name);
+  const choose = (r: SeanceRef) => {
+    onChange(r.name);
+    onPickRef?.(r);
     setOpen(false);
   };
   const add = () => {
@@ -112,7 +116,7 @@ export function SeanceCombo({
               <button
                 key={r.id}
                 type="button"
-                onClick={() => choose(r.name)}
+                onClick={() => choose(r)}
                 className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left font-sans text-[14px] text-ink transition hover:bg-cream/70"
               >
                 <span
@@ -309,9 +313,94 @@ export function ReferencesPage({
       </div>
 
       {tab === "seances" ? (
-        <SeanceRefs refs={seanceRefs} setRefs={setSeanceRefs} />
+        <SeanceRefs
+          refs={seanceRefs}
+          setRefs={setSeanceRefs}
+          exerciseRefs={exerciseRefs}
+        />
       ) : (
         <ExerciseRefs refs={exerciseRefs} setRefs={setExerciseRefs} />
+      )}
+    </div>
+  );
+}
+
+// ── Recherche d'exercice (référence uniquement) ────────────────────────────
+// Champ de saisie + autocomplétion limité aux exercices déjà en référence : on
+// tape pour filtrer, mais on ne peut sélectionner qu'un exercice existant
+// (aucune création ici). Utilisé pour composer une séance type.
+function RefExercisePicker({
+  exerciseRefs,
+  exclude,
+  onPick,
+}: {
+  exerciseRefs: ExerciseRef[];
+  exclude: string[];
+  onPick: (name: string) => void;
+}) {
+  const t = useT();
+  const [q, setQ] = useState("");
+  const [open, setOpen] = useState(false);
+  const boxRef = useRef<HTMLDivElement>(null);
+  useCloseOnOutside(boxRef, open, () => setOpen(false));
+
+  const available = exerciseRefs.filter((er) => !exclude.includes(er.name));
+  const ql = q.trim().toLowerCase();
+  const matches = available.filter(
+    (er) =>
+      er.name.toLowerCase().includes(ql) ||
+      (er.muscle || "").toLowerCase().includes(ql),
+  );
+  const pick = (name: string) => {
+    onPick(name);
+    setQ("");
+    setOpen(false);
+  };
+
+  return (
+    <div className="relative" ref={boxRef}>
+      <input
+        value={q}
+        onChange={(e) => {
+          setQ(e.target.value);
+          setOpen(true);
+        }}
+        onFocus={() => setOpen(true)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && matches.length > 0) {
+            e.preventDefault();
+            pick(matches[0].name);
+          } else if (e.key === "Escape") {
+            setOpen(false);
+          }
+        }}
+        placeholder={t("Rechercher un exercice…")}
+        className="w-full rounded-lg border border-line bg-cream/40 px-3 py-2 font-sans text-[13.5px] text-ink placeholder:text-muted/70 outline-none transition focus:border-ink/40 focus:bg-paper"
+      />
+      {open && (
+        <div className="absolute inset-x-0 top-full z-30 mt-1.5 max-h-56 overflow-y-auto rounded-xl border border-line bg-paper py-1 shadow-xl">
+          {matches.length > 0 ? (
+            matches.map((er) => (
+              <button
+                key={er.id}
+                type="button"
+                onClick={() => pick(er.name)}
+                className="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left transition hover:bg-cream/70"
+              >
+                <span className="font-sans text-[14px] text-ink">{er.name}</span>
+                {er.muscle && (
+                  <span className="shrink-0 font-mono text-[10.5px] uppercase tracking-[0.12em] text-muted">
+                    {er.muscle}
+                  </span>
+                )}
+              </button>
+            ))
+          ) : (
+            <div className="px-4 py-2.5 font-sans text-[13px] text-muted">
+              {t("Aucun exercice trouvé en référence.")}
+            </div>
+          )}
+        </div>
       )}
     </div>
   );
@@ -320,9 +409,11 @@ export function ReferencesPage({
 function SeanceRefs({
   refs,
   setRefs,
+  exerciseRefs,
 }: {
   refs: SeanceRef[];
   setRefs: React.Dispatch<React.SetStateAction<SeanceRef[]>>;
+  exerciseRefs: ExerciseRef[];
 }) {
   const t = useT();
   const [name, setName] = useState("");
@@ -333,10 +424,16 @@ function SeanceRefs({
   const add = () => {
     const n = name.trim();
     if (!n) return;
-    setRefs((p) => [...p, { id: newId(), name: n, color }]);
+    setRefs((p) => [...p, { id: newId(), name: n, color, exercises: [] }]);
     setName("");
     setColor(REF_COLORS[(refs.length + 1) % REF_COLORS.length]);
   };
+
+  // Add / remove an exercise (by reference name) from a template.
+  const addExercise = (r: SeanceRef, exName: string) =>
+    update(r.id, { exercises: [...(r.exercises ?? []), exName] });
+  const removeExercise = (r: SeanceRef, idx: number) =>
+    update(r.id, { exercises: (r.exercises ?? []).filter((_, i) => i !== idx) });
 
   return (
     <div className="flex flex-col gap-6">
@@ -362,30 +459,84 @@ function SeanceRefs({
       </div>
 
       <div className="flex flex-col gap-2.5">
-        {refs.map((r) => (
-          <div
-            key={r.id}
-            className="flex items-center gap-3 rounded-card border border-line bg-paper px-4 py-3"
-          >
-            <ColorSwatch
-              color={r.color}
-              onChange={(c) => update(r.id, { color: c })}
-              size={28}
-            />
-            <input
-              value={r.name}
-              onChange={(e) => update(r.id, { name: e.target.value })}
-              className="min-w-0 flex-1 rounded-lg border border-transparent bg-transparent px-1 py-1.5 font-serif text-[18px] text-ink outline-none transition hover:border-line focus:border-ink/30 focus:bg-cream/40"
-            />
-            <button
-              onClick={() => remove(r.id)}
-              className="shrink-0 rounded-lg p-2 text-muted transition hover:bg-ink/5 hover:text-ink"
-              title={t("Supprimer")}
+        {refs.map((r) => {
+          const exercises = r.exercises ?? [];
+          const available = exerciseRefs.filter(
+            (er) => !exercises.includes(er.name),
+          );
+          return (
+            <div
+              key={r.id}
+              className="rounded-card border border-line bg-paper px-4 py-3"
             >
-              <Icons.Trash size={17} />
-            </button>
-          </div>
-        ))}
+              <div className="flex items-center gap-3">
+                <ColorSwatch
+                  color={r.color}
+                  onChange={(c) => update(r.id, { color: c })}
+                  size={28}
+                />
+                <input
+                  value={r.name}
+                  onChange={(e) => update(r.id, { name: e.target.value })}
+                  className="min-w-0 flex-1 rounded-lg border border-transparent bg-transparent px-1 py-1.5 font-serif text-[18px] text-ink outline-none transition hover:border-line focus:border-ink/30 focus:bg-cream/40"
+                />
+                <button
+                  onClick={() => remove(r.id)}
+                  className="shrink-0 rounded-lg p-2 text-muted transition hover:bg-ink/5 hover:text-ink"
+                  title={t("Supprimer")}
+                >
+                  <Icons.Trash size={17} />
+                </button>
+              </div>
+
+              {/* Exercices de la séance type */}
+              <div className="mt-3 border-t border-line/60 pt-3">
+                <div className="mb-2 font-sans text-[10.5px] font-semibold uppercase tracking-[0.16em] text-muted">
+                  {t("Exercices")}
+                </div>
+                {exercises.length > 0 && (
+                  <div className="mb-2.5 flex flex-col gap-1.5">
+                    {exercises.map((exName, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center gap-2 rounded-lg bg-cream/50 px-2.5 py-1.5"
+                      >
+                        <span className="w-5 shrink-0 text-right font-mono text-[11px] text-muted">
+                          {i + 1}
+                        </span>
+                        <span className="min-w-0 flex-1 truncate font-sans text-[14px] text-ink/85">
+                          {exName}
+                        </span>
+                        <button
+                          onClick={() => removeExercise(r, i)}
+                          className="shrink-0 rounded-md p-1 text-muted transition hover:bg-ink/5 hover:text-ink"
+                          title={t("Retirer")}
+                        >
+                          <Icons.X size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {available.length > 0 ? (
+                  <RefExercisePicker
+                    exerciseRefs={exerciseRefs}
+                    exclude={exercises}
+                    onPick={(exName) => addExercise(r, exName)}
+                  />
+                ) : exerciseRefs.length === 0 ? (
+                  <p className="font-sans text-[12.5px] italic text-muted">
+                    {t("Ajoute d'abord des exercices dans l'onglet « Exercices ».")}
+                  </p>
+                ) : (
+                  <p className="font-sans text-[12.5px] italic text-muted">
+                    {t("Tous tes exercices sont déjà dans cette séance.")}
+                  </p>
+                )}
+              </div>
+            </div>
+          );
+        })}
         {refs.length === 0 && (
           <EmptyRef label={t("Aucune séance type pour l'instant.")} />
         )}

@@ -59,7 +59,7 @@ jobs:
         with:
           projectPath: .
           tagName: ${{ github.ref_name }}
-          releaseName: "Push Pull Skip ${{ github.ref_name }}"
+          releaseName: "PPS ${{ github.ref_name }}"
           releaseBody: "Voir CHANGELOG.md pour les détails de cette version."
           releaseDraft: true
           prerelease: false

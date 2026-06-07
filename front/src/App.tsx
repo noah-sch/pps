@@ -165,7 +165,12 @@ export default function App() {
     const color =
       REF_COLORS.find((c) => !used.includes(c)) ||
       REF_COLORS[seanceRefs.length % REF_COLORS.length];
-    const ref: SeanceRef = { id: "u_" + Date.now().toString(36), name, color };
+    const ref: SeanceRef = {
+      id: "u_" + Date.now().toString(36),
+      name,
+      color,
+      exercises: [],
+    };
     setSeanceRefs((p) => [...p, ref]);
     return ref;
   };
@@ -379,7 +384,7 @@ export default function App() {
       );
 
     screen = (
-      <div className="min-h-screen bg-cream pb-24 sm:pb-0">
+      <div className="min-h-screen bg-cream pb-[calc(6rem_+_env(safe-area-inset-bottom))] sm:pb-0">
         <TopBar
           route={route}
           nav={nav}
@@ -424,7 +429,10 @@ function TopBar({
 }) {
   const t = useT();
   return (
-    <header className="sticky top-0 z-30 border-b border-line bg-cream/85 backdrop-blur-md">
+    <header
+      className="sticky top-0 z-30 border-b border-line bg-cream/85 backdrop-blur-md"
+      style={{ paddingTop: "env(safe-area-inset-top)" }}
+    >
       <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-5 py-4 sm:px-8">
         <button
           onClick={() => nav("tracking")}
@@ -502,7 +510,10 @@ function BottomNav({
 }) {
   const t = useT();
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-paper/95 backdrop-blur-md sm:hidden">
+    <nav
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-paper/95 backdrop-blur-md sm:hidden"
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+    >
       <div className="mx-auto flex max-w-md items-stretch justify-around px-2 py-2">
         {NAV.map((item) => {
           const active = route.name === item.key;

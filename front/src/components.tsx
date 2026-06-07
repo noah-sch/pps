@@ -511,36 +511,91 @@ export function ActivityGrid({
     if (colors && colors[key]) return colors[key];
     return (d.type && TYPE_DOT[d.type]) || "var(--muted)";
   };
+  const labelOf = (d: CalendarDay) =>
+    (d.seance || d.type ? (d.seance || "") + " — " : "") +
+    fmtDate(d.date, { weekday: "short", day: "numeric", month: "short" });
+
+  // Auto-scroll to the far right so the most recent days are visible when the
+  // grid overflows (typically on phones).
+  const scrollRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el) el.scrollLeft = el.scrollWidth;
+  }, [calendar.length, cell]);
+
+  // Tap-to-reveal detail — the mobile equivalent of the desktop hover tooltip.
+  // The bubble is fixed-positioned and clamped to the viewport so it stays
+  // visible even for cells near the screen edges.
+  const TIP_W = 200;
+  const [tip, setTip] = useState<{ x: number; y: number; text: string } | null>(
+    null,
+  );
+  useEffect(() => {
+    if (!tip) return;
+    const close = () => setTip(null);
+    // Defer the outside-tap listener so the opening tap doesn't close it.
+    const armed = setTimeout(
+      () => document.addEventListener("pointerdown", close, { once: true }),
+      0,
+    );
+    const auto = setTimeout(close, 2600);
+    window.addEventListener("scroll", close, true);
+    window.addEventListener("resize", close);
+    return () => {
+      clearTimeout(armed);
+      clearTimeout(auto);
+      document.removeEventListener("pointerdown", close);
+      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("resize", close);
+    };
+  }, [tip]);
+
+  const showTip = (rect: DOMRect, d: CalendarDay) => {
+    const x = Math.max(
+      8 + TIP_W / 2,
+      Math.min(window.innerWidth - 8 - TIP_W / 2, rect.left + rect.width / 2),
+    );
+    setTip({ x, y: rect.top - 6, text: labelOf(d) });
+  };
+
   return (
-    <div className="flex gap-[5px]">
-      {weeks.map((wk, wi) => (
-        <div key={wi} className="flex flex-col gap-[5px]">
-          {wk.map((d, di) => {
-            const trained = d.seance || d.type;
-            return (
-              <div
-                key={di}
-                title={
-                  (trained ? (d.seance || "") + " — " : "") +
-                  fmtDate(d.date, {
-                    weekday: "short",
-                    day: "numeric",
-                    month: "short",
-                  })
-                }
-                className="rounded-[3px] border border-line/60"
-                style={{
-                  width: cell,
-                  height: cell,
-                  background: colorOf(d),
-                  opacity: trained ? 1 : 0.5,
-                }}
-              />
-            );
-          })}
+    <>
+      <div ref={scrollRef} className="no-scrollbar overflow-x-auto">
+        <div className="flex w-max gap-[5px]">
+          {weeks.map((wk, wi) => (
+            <div key={wi} className="flex flex-col gap-[5px]">
+              {wk.map((d, di) => {
+                const trained = d.seance || d.type;
+                return (
+                  <div
+                    key={di}
+                    title={labelOf(d)}
+                    onClick={(e) =>
+                      showTip(e.currentTarget.getBoundingClientRect(), d)
+                    }
+                    className="shrink-0 cursor-pointer rounded-[3px] border border-line/60"
+                    style={{
+                      width: cell,
+                      height: cell,
+                      background: colorOf(d),
+                      opacity: trained ? 1 : 0.5,
+                    }}
+                  />
+                );
+              })}
+            </div>
+          ))}
         </div>
-      ))}
-    </div>
+      </div>
+      {tip && (
+        <div
+          className="pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-full rounded-lg bg-ink px-2.5 py-1.5 text-center font-sans text-[11.5px] font-medium leading-snug text-paper shadow-lg"
+          style={{ left: tip.x, top: tip.y, maxWidth: TIP_W }}
+        >
+          {tip.text}
+        </div>
+      )}
+    </>
   );
 }
 

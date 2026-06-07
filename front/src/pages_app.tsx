@@ -400,6 +400,15 @@ export function AddSessionPage({
   const removeEx = (i: number) =>
     setExercises((ex) => ex.filter((_, idx) => idx !== i));
 
+  // Picking a séance type pre-fills its exercises (one empty set each) so only
+  // the series remain to enter. A template without exercises leaves the form
+  // untouched. Exercises can still be added/removed for this specific session.
+  const prefillFromTemplate = (ref: SeanceRef) => {
+    const exs = ref.exercises ?? [];
+    if (exs.length === 0) return;
+    setExercises(exs.map((nm) => ({ name: nm, sets: [{ reps: "", weight: "" }] })));
+  };
+
   const save = () => {
     const cleaned = exercises
       .filter((e) => e.name.trim())
@@ -438,6 +447,7 @@ export function AddSessionPage({
             onChange={setName}
             seanceRefs={seanceRefs}
             onAddRef={addSeanceRef}
+            onPickRef={prefillFromTemplate}
             placeholder={t("Push, Pull, Jambes…")}
           />
         </Field>
