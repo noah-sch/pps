@@ -2,4 +2,5 @@
 # will have compiled files and executables
 /target/
 /gen/schemas
-/icons/
+# NB: /icons/ are committed source assets required by tauri.conf.json at build
+# time — they must NOT be ignored, or CI release builds fail on a clean checkout.

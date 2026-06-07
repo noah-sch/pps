@@ -20,12 +20,12 @@
 }
 
 /* ── Runtime variables — design tweaks baked in ──────────────────────────────
-   • Couleur secondaire : orange      → --accent
+   • Couleur secondaire : terracotta (#C4493A) → --accent
    • Titres : style moderne           → --font-display = Space Grotesk
    • Coins : doux (arrondis)          → --radius-card-px = 18px              */
 :root {
-  --accent: oklch(0.7 0.17 50);
-  --accent-soft: oklch(0.7 0.17 50 / 0.15);
+  --accent: #c4493a;
+  --accent-soft: rgb(196 73 58 / 0.15);
   --font-display: "Space Grotesk", Georgia, serif;
   --radius-card-px: 18px;
   color-scheme: light;
@@ -35,7 +35,7 @@
    Activé par la classe `.dark` posée sur <html> (gérée côté React et mémorisée).
    On ne fait que réassigner les tokens de couleur : tout le reste de l'UI les
    consomme via `var(--color-*)`, donc bascule automatiquement. Palette sombre
-   chaude, cohérente avec l'esprit « papier » du thème clair. L'accent (orange)
+   chaude, cohérente avec l'esprit « papier » du thème clair. L'accent
    et le titre « Push Pull Skip » restent inchangés. */
 .dark {
   --color-cream: #15130f; /* fond */
@@ -44,7 +44,7 @@
   --color-muted: #9a9080; /* texte secondaire */
   --color-line: #332f27; /* filets / bordures */
   --color-sage: #9aa17e;
-  --accent-soft: oklch(0.7 0.17 50 / 0.22);
+  --accent-soft: rgb(196 73 58 / 0.22);
   color-scheme: dark;
 }
 

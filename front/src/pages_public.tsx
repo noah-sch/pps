@@ -330,7 +330,7 @@ export function LandingPage({
       </main>
 
       <footer className="mx-auto flex w-full max-w-6xl items-center justify-between whitespace-nowrap border-t border-line px-6 py-5 font-mono text-[10.5px] uppercase tracking-[0.2em] text-muted sm:px-10">
-        <span>© 2026 Push Pull Skip</span>
+        <span>© 2026 PPS</span>
         <span className="hidden sm:block">{t("Carnet d'entraînement")}</span>
       </footer>
     </div>
