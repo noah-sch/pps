@@ -89,4 +89,4 @@ React + TypeScript + Tailwind CSS v4 (Vite) for the UI; Rust for the native core
 
 ---
 
-© 2026 Push Pull Skip.
+© 2026 PPS.
