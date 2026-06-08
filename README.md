@@ -86,11 +86,11 @@ npm run android:build       # APK / AAB
 
 ## 🏷️ Versions
 
-Current version: **0.1.0**. The project follows [semantic versioning](https://semver.org/);
+Current version: **0.2.0**. The project follows [semantic versioning](https://semver.org/);
 the change history lives in [CHANGELOG.md](./CHANGELOG.md).
 
-Pushing a `v*` tag (e.g. `v0.1.1`) automatically builds and publishes the macOS
-and Windows installers.
+Pushing a `v*` tag (e.g. `v0.2.1`) automatically builds and publishes the macOS, Windows
+and Android installers.
 
 ## 🛠️ Tech stack
 
@@ -99,4 +99,6 @@ React + TypeScript + Tailwind CSS v4 (Vite) for the UI; Rust for the native core
 
 ---
 
-© 2026 PPS.
+## Licence 
+
+MIT
